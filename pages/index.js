@@ -1,35 +1,7 @@
 import { Box, Button, Text, TextField, Image } from '@skynexui/components';
+import React from 'react';
+import { useRouter } from 'next/router';
 import appConfig from '../config.json';
-
-
-function GlobalStyle() {
-    return (
-      <style global jsx>{`
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          list-style: none;
-        }
-        body {
-          font-family: 'Open Sans', sans-serif;
-        }
-        /* App fit Height */ 
-        html, body, #__next {
-          min-height: 100vh;
-          display: flex;
-          flex: 1;
-        }
-        #__next {
-          flex: 1;
-        }
-        #__next > * {
-          flex: 1;
-        }
-        /* ./App fit Height */ 
-      `}</style>
-    );
-}
 
 function Titulo(props){
     const Tag = props.tag || 'h1';
@@ -62,16 +34,17 @@ function Titulo(props){
 // export default HomePage
 
 export default function PaginaInicial() {
-    const username = 'Coastony';
+    //const username = 'Coastony';
+    const [username, setUsername] = React.useState('Coastony');
+    const roteamento = useRouter();
   
     return (
       <>
-        <GlobalStyle />
         <Box
           styleSheet={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backgroundColor: appConfig.theme.colors.primary[500],
-            backgroundImage: 'url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)',
+            backgroundColor: appConfig.theme.colors.neutrals[100], 
+            backgroundImage: 'url(https://occ-0-2794-2219.1.nflxso.net/dnm/api/v6/E8vDc_W8CLv7-yMQu8KMEC7Rrr8/AAAABXEwGCJ_xHOvzmJXjc5Bw7DJXFKjzNHkKzKqsePNOJFHrgksfHUDeu8V9qAJIQmEx2FjlkK-BBqggVXSlXbZJVhRPuvx.jpg?r=7cc)',
             backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
           }}
         >
@@ -84,26 +57,61 @@ export default function PaginaInicial() {
                 xs: 'column',
                 sm: 'row',
               },
-              width: '100%', maxWidth: '700px',
+              width: '100%', maxWidth: '700px', 
               borderRadius: '5px', padding: '32px', margin: '16px',
               boxShadow: '0 2px 10px 0 rgb(0 0 0 / 20%)',
-              backgroundColor: appConfig.theme.colors.neutrals[700],
+              backgroundColor: appConfig.theme.colors.neutrals[600], opacity: 0.9,
             }}
           >
             {/* Formulário */}
             <Box
               as="form"
+              onSubmit={function (infosdoEvento) {
+                infosdoEvento.preventDefault();
+                console.log('Alguém submeteu o form');
+                roteamento.push('/chat');
+              }}
               styleSheet={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px',
+                width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px'
               }}
             >
-              <Titulo tag="h2">Boas vindas de volta!</Titulo>
+              <Titulo tag="h2">Bem vindo de volta!</Titulo>
               <Text variant="body3" styleSheet={{ marginBottom: '32px', color: appConfig.theme.colors.neutrals[300] }}>
                 {appConfig.name}
               </Text>
+
+              {/* <input
+               type="text"
+               value={username}
+               onChange = {function (event) {
+                console.log('usuario digitou', event.target.value);
+                // Onde tá o valor
+                const valor = event.target.value;
+                // Trocar o valor da variável
+                // Através do React e avisa se precisa
+                setUsername(valor);
+               }}
+              /> */}
   
               <TextField
+              value={username}
+              onChange = {function (event) {
+                console.log('usuario digitou', event.target.value);
+                // Onde tá o valor
+                const valor = event.target.value;
+                // Trocar o valor da variável
+                // Através do React e avisa se precisa
+                setUsername(valor);
+
+                // Desafios - Aula 2
+
+                // se o campo tiver menos de 2 caracteres, desabilitar o campo e não mostrar
+                // a imagem, se tiver mais exibir normalmente - omariosouto
+
+                //Customizar a tela - peas
+              
+               }}
                 fullWidth
                 textFieldColors={{
                   neutral: {
@@ -119,7 +127,7 @@ export default function PaginaInicial() {
                 label='Entrar'
                 fullWidth
                 buttonColors={{
-                  contrastColor: appConfig.theme.colors.neutrals["000"],
+                  contrastColor: appConfig.theme.colors.neutrals[900],
                   mainColor: appConfig.theme.colors.primary[500],
                   mainColorLight: appConfig.theme.colors.primary[400],
                   mainColorStrong: appConfig.theme.colors.primary[600],
