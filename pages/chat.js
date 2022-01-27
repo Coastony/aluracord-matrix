@@ -1,180 +1,212 @@
-import { Box, Button, Text, TextField, Image } from '@skynexui/components';
+import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import React from 'react';
-import { useRouter } from 'next/router';
 import appConfig from '../config.json';
+import { createClient } from '@supabase/supabase-js'
 
-function Titulo(props){
-    const Tag = props.tag || 'h1';
-    return (
-        <>
-        <Tag>{props.children}</Tag>
-        <style jsx>{`
-         ${Tag} {
-            color: ${appConfig.theme.colors.neutrals['000']};
-            font-size: 20px;
-            font-weight: 600;
-        }
-         `}</style>
-        </>
-    )
-}
+// Como fazer AJAX: https://medium.com/@omariosouto/entendendo-como-fazer-ajax-com-a-fetchapi-977ff20da3c6
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzI5MDIwOSwiZXhwIjoxOTU4ODY2MjA5fQ.hgA2v0BIUlkeIBnvvnuwm61XH4tYfEf-g-AIsl2kwV4';
+const SUPABASE_URL = 'https://vezljcvjadbymooqjpsj.supabase.co';
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Componente React
-// function HomePage() {
-//     // JSX
-//     return (
-//     <div>
-//     <GlobalStyle/>
-//      <Titulo tag="h2">Boas vindas de volta!</Titulo>
-//      <h2>Discord - Alura Matrix</h2>
-//     </div>
-//     )
-// }
+export default function ChatPage() {
+    const [mensagem, setMensagem] = React.useState('');
+    const [listaDeMensagens, setListaDeMensagens] = React.useState([]);
   
-// export default HomePage
+    React.useEffect(() => {
+      supabaseClient
+        .from('mensagens')
+        .select('*')
+        .order('id', { ascending: false })
+        .then(({ data }) => {
+          console.log('Dados da consulta:', data);
+          setListaDeMensagens(data);
+        });
+    }, []);
 
-export default function PaginaInicial() {
-    //const username = 'Coastony';
-    const [username, setUsername] = React.useState('Coastony');
-    const roteamento = useRouter();
-  
+    function handleNovaMensagem(novaMensagem) {
+        const mensagem = {
+          // id: listaDeMensagens.length + 1,
+          de: 'vanessametonini',
+          texto: novaMensagem,
+        };
+
+        supabaseClient
+      .from('mensagens')
+      .insert([
+        // Tem que ser um objeto com os MESMOS CAMPOS que você escreveu no supabase
+        mensagem
+      ])
+      .then(({ data }) => {
+        console.log('Criando mensagem: ', data);
+        setListaDeMensagens([ data[0],
+            ...listaDeMensagens,
+          ]);
+        });
+        setMensagem('');
+    }
+
     return (
-      <>
         <Box
           styleSheet={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backgroundColor: appConfig.theme.colors.neutrals[100], 
-            backgroundImage: 'url(https://occ-0-2794-2219.1.nflxso.net/dnm/api/v6/E8vDc_W8CLv7-yMQu8KMEC7Rrr8/AAAABXEwGCJ_xHOvzmJXjc5Bw7DJXFKjzNHkKzKqsePNOJFHrgksfHUDeu8V9qAJIQmEx2FjlkK-BBqggVXSlXbZJVhRPuvx.jpg?r=7cc)',
+            backgroundColor: appConfig.theme.colors.primary[500],
+            backgroundImage: `url(https://occ-0-2794-2219.1.nflxso.net/dnm/api/v6/E8vDc_W8CLv7-yMQu8KMEC7Rrr8/AAAABXEwGCJ_xHOvzmJXjc5Bw7DJXFKjzNHkKzKqsePNOJFHrgksfHUDeu8V9qAJIQmEx2FjlkK-BBqggVXSlXbZJVhRPuvx.jpg?r=7cc)`,
             backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
+            color: appConfig.theme.colors.neutrals['000']
           }}
         >
-          <Box
+        <Box
+        styleSheet={{
+          display: 'flex',
+          flexDirection: 'column',
+          opacity: 0.9,
+          flex: 1,
+          boxShadow: '0 2px 10px 0 rgb(0 0 0 / 20%)',
+          borderRadius: '5px',
+          backgroundColor: appConfig.theme.colors.neutrals[700],
+          height: '100%',
+          maxWidth: '95%',
+          maxHeight: '95vh',
+          padding: '32px',
+        }}
+      >
+        <Header />
+        <Box
+         styleSheet={{
+            position: 'relative',
+            display: 'flex',
+            flex: 1,
+            height: '80%',
+            backgroundColor: appConfig.theme.colors.neutrals[600],
+            flexDirection: 'column',
+            borderRadius: '5px',
+            padding: '16px',
+          }}
+        ></Box> <MessageList mensagens={listaDeMensagens} />
+        {/* {listaDeMensagens.map((mensagemAtual) => {
+                      return (
+                          <li key={mensagemAtual.id}>
+                              {mensagemAtual.de}: {mensagemAtual.texto}
+                          </li>
+                      )
+                  })} */}
+         <Box
+            as="form"
             styleSheet={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              flexDirection: {
-                xs: 'column',
-                sm: 'row',
-              },
-              width: '100%', maxWidth: '700px', 
-              borderRadius: '5px', padding: '32px', margin: '16px',
-              boxShadow: '0 2px 10px 0 rgb(0 0 0 / 20%)',
-              backgroundColor: appConfig.theme.colors.neutrals[600], opacity: 0.9,
             }}
           >
-            {/* Formulário */}
-            <Box
-              as="form"
-              onSubmit={function (infosdoEvento) {
-                infosdoEvento.preventDefault();
-                console.log('Alguém submeteu o form');
-                roteamento.push('/chat');
-              }}
-              styleSheet={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px'
-              }}
-            >
-              <Titulo tag="h2">Bem vindo de volta!</Titulo>
-              <Text variant="body3" styleSheet={{ marginBottom: '32px', color: appConfig.theme.colors.neutrals[300] }}>
-                {appConfig.name}
-              </Text>
-
-              {/* <input
-               type="text"
-               value={username}
-               onChange = {function (event) {
-                console.log('usuario digitou', event.target.value);
-                // Onde tá o valor
+            <TextField
+              value={mensagem}
+              onChange={(event) => {
                 const valor = event.target.value;
-                // Trocar o valor da variável
-                // Através do React e avisa se precisa
-                setUsername(valor);
-               }}
-              /> */}
-  
-              <TextField
-              value={username}
-              onChange = {function (event) {
-                console.log('usuario digitou', event.target.value);
-                // Onde tá o valor
-                const valor = event.target.value;
-                // Trocar o valor da variável
-                // Através do React e avisa se precisa
-                setUsername(valor);
-
-                // Desafios - Aula 2
-
-                // se o campo tiver menos de 2 caracteres, desabilitar o campo e não mostrar
-                // a imagem, se tiver mais exibir normalmente - omariosouto
-
-                //Customizar a tela - peas
-              
-               }}
-                fullWidth
-                textFieldColors={{
-                  neutral: {
-                    textColor: appConfig.theme.colors.neutrals[200],
-                    mainColor: appConfig.theme.colors.neutrals[900],
-                    mainColorHighlight: appConfig.theme.colors.primary[500],
-                    backgroundColor: appConfig.theme.colors.neutrals[800],
-                  },
-                }}
-              />
-              <Button
-                type='submit'
-                label='Entrar'
-                fullWidth
-                buttonColors={{
-                  contrastColor: appConfig.theme.colors.neutrals[900],
-                  mainColor: appConfig.theme.colors.primary[500],
-                  mainColorLight: appConfig.theme.colors.primary[400],
-                  mainColorStrong: appConfig.theme.colors.primary[600],
-                }}
-              />
-            </Box>
-            {/* Formulário */}
-  
-  
-            {/* Photo Area */}
-            <Box
+                setMensagem(valor);
+              }}
+              onKeyPress={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  handleNovaMensagem(mensagem);
+                }
+              }}
+              placeholder="Insira sua mensagem aqui..."
+              type="textarea"
               styleSheet={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                maxWidth: '200px',
-                padding: '16px',
+                width: '100%',
+                border: '0',
+                resize: 'none',
+                borderRadius: '5px',
+                padding: '6px 8px',
                 backgroundColor: appConfig.theme.colors.neutrals[800],
-                border: '1px solid',
-                borderColor: appConfig.theme.colors.neutrals[999],
-                borderRadius: '10px',
-                flex: 1,
-                minHeight: '240px',
+                marginRight: '12px',
+                color: appConfig.theme.colors.neutrals[200],
               }}
-            >
-              <Image
-                styleSheet={{
-                  borderRadius: '50%',
-                  marginBottom: '16px',
-                }}
-                src={`https://github.com/${username}.png`}
-              />
-              <Text
-                variant="body4"
-                styleSheet={{
-                  color: appConfig.theme.colors.neutrals[200],
-                  backgroundColor: appConfig.theme.colors.neutrals[900],
-                  padding: '3px 10px',
-                  borderRadius: '1000px'
-                }}
-              >
-                {username}
-              </Text>
-            </Box>
-            {/* Photo Area */}
+            />
           </Box>
         </Box>
-      </>
-    );
+      </Box>
+  )
+}
+
+    function Header() {
+     return (
+        <>
+          <Box styleSheet={{ width: '100%', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} >
+            <Text variant='heading5'>
+              Chat
+            </Text>
+            <Button
+              variant='tertiary'
+              colorVariant='neutral'
+              label='Logout'
+              href="/"
+            />
+          </Box>
+        </>
+      )
+    }
+
+    function MessageList(props) {
+        console.log(props);
+  return (
+    <Box
+      tag="ul"
+      styleSheet={{
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column-reverse',
+        flex: 1,
+        color: appConfig.theme.colors.neutrals["000"],
+        marginBottom: '16px',
+      }}
+    >
+      {props.mensagens.map((mensagem) => {
+        return (
+          <Text
+            key={mensagem.id}
+            tag="li"
+            styleSheet={{
+                borderRadius: '5px',
+                padding: '6px',
+                marginBottom: '12px',
+                hover: {
+                  backgroundColor: appConfig.theme.colors.neutrals[700],
+                }
+              }}
+              >
+              <Box
+                styleSheet={{
+                  marginBottom: '8px',
+                }}
+              >
+                <Image
+                  styleSheet={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    display: 'inline-block',
+                    marginRight: '8px',
+                  }}
+                  src={`https://github.com/${mensagem.de}.png`}
+                />
+                <Text tag="strong">
+                  {mensagem.de}
+                </Text>
+                <Text
+                  styleSheet={{
+                    fontSize: '10px',
+                    marginLeft: '8px',
+                    color: appConfig.theme.colors.neutrals[300],
+                  }}
+                  tag="span"
+                >
+                  {(new Date().toLocaleDateString())}
+                </Text>
+              </Box>
+              {mensagem.texto}
+            </Text>
+          );
+        })}
+      </Box>
+    )
   }
